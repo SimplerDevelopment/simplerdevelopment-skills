@@ -1,381 +1,250 @@
 # Roadmap
 
-A map of every skill that *could* exist on top of the SimplerDevelopment.com MCP surface, what's already shipped, and what's still on the table. Use this to plan the next batch.
+The plan for skills built on top of the SimplerDevelopment.com MCP surface. **Optimized for token economy** — favors small numbers of focused bundles over many atomic skills.
 
-**Status legend**
+## Why bundles, not 80 atomic skills
 
-- ✓ shipped (in this repo)
-- 🚧 planned / in progress
-- 💡 candidate — proposed here, not yet built
+Claude Code loads every installed skill's name + description into the system prompt of every conversation. With ~200 SD MCP tools, the naive 1-skill-per-CRUD approach would install 80+ skills, costing **12-15K tokens per turn** even when you're not touching SD. That's 6-7% of a 200K window gone before you type anything, plus a selection-quality drop as the LLM picks between near-duplicate triggers.
 
-**Priority legend**
+Instead, this roadmap groups by domain. One `sd-crm` skill with internal sub-modes ("create-contact", "create-deal", etc.) beats five separate skills. The description stays small; the body handles routing.
 
-- **P0** — high impact, build next
-- **P1** — clear value, build soon
-- **P2** — nice-to-have, build when justified
-- **Pmacro** — cross-cutting orchestration skill that composes other skills
+**Install-profile token cost (description weight only):**
 
-**MCP coverage at a glance**
-
-The portal currently exposes **~200 MCP tools** across 25+ feature areas. The 9 shipped skills cover ~40 of those tools (~20%). This roadmap covers the rest.
-
----
-
-## 1. Shipped skills (recap)
-
-| Skill | MCP tools used | Status |
+| Profile | Skills | Approx tokens / turn |
 |---|---|---|
-| `sd-init` | `whoami`, `profile_get`, `branding_list_profiles`, `sites_list`, `block_templates_list`, `email_templates_list` | ✓ |
-| `sd-create-page` | `posts_create`, `taxonomies_*`, `block_templates_list` | ✓ |
-| `sd-create-deck` | `decks_create`, `decks_replace_slides`, `decks_publish_all`, `branding_get_profile` | ✓ |
-| `sd-create-email` | `email_campaigns_create`, `email_lists`, `email_templates_list`, `email_segments_*` | ✓ |
-| `sd-create-survey` | `surveys_create`, `surveys_update` | ✓ |
-| `sd-create-booking-page` | `booking_pages_create`, `booking_pages_update` | ✓ |
-| `sd-create-website` | `posts_create` (xN), `nav_create`, `sites_update` | ✓ |
-| `sd-build-html-embed` | `posts_upload_html(_zip)`, `decks_upload_html(_zip)` | ✓ |
-| `sd-learn` | (none — writes `.sd/learnings.md`) | ✓ |
+| **Minimal** — `sd-init` + `sd-learn` + `sd-find-skill` | 3 | ~500 |
+| **Existing atoms (today)** — the 9 shipped | 9 | ~1,500 |
+| **Full bundle set** — atoms + all 10 domain bundles + macros | ~24 | ~3,500 |
+| **Naive atomic (avoid)** — one skill per MCP tool | 80+ | 12,000–15,000 |
+
+Status legend: ✓ shipped · 🚧 planned · 💡 candidate
+
+Priority: **P0** next batch · **P1** soon · **P2** when justified
 
 ---
 
-## 2. CRM (largest gap)
+## Tier 1 · Core (always installed)
 
-The portal has 25+ CRM tools and zero shipped skills.
+Three skills that are universally useful and cheap.
 
-| Proposed skill | What it does | MCP tools | Priority |
+| Skill | What it does | MCP tools | Status |
 |---|---|---|---|
-| `sd-create-contact` | Add a contact via interview; resolves company; sets custom fields; logs first activity. | `crm_contacts_create/search/update`, `crm_custom_field_values_set`, `crm_activities_create` | **P0** |
-| `sd-create-company` | Add a company; optional bulk-add of related contacts. | `crm_companies_create/search/update` | **P0** |
-| `sd-create-deal` | Open a deal, place it on the right pipeline + stage, attach contacts and proposals. | `crm_deals_create`, `crm_pipelines_list`, `crm_deal_artifact_link` | **P0** |
-| `sd-pipeline-tracker` | Weekly pipeline digest: deals by stage, stalled deals, scoring outliers. | `crm_deals_list`, `crm_pipelines_list`, `crm_scoring_rules_list` | **P1** |
-| `sd-deal-move-stage` | Move a deal to a new stage with reason + activity log. | `crm_deals_move_stage`, `crm_activities_create`, `crm_deal_comments_create` | **P1** |
-| `sd-crm-import` | Bulk import contacts/companies from CSV or pasted list; dedupe via search-then-create. | `crm_contacts_search/create`, `crm_companies_search/create`, `crm_custom_field_values_set` | **P1** |
-| `sd-crm-custom-fields-setup` | Bootstrap a tenant's custom-field schema from a brief. | `crm_custom_fields_create/list/update`, `crm_custom_field_values_set` | **P2** |
-| `sd-search-crm` | Natural-language search across contacts, companies, deals with linkbacks. | `crm_contacts_search`, `crm_companies_search`, `crm_deals_list`, `crm_saved_views_list` | **P1** |
-| `sd-deal-followup-email` | Compose a followup email from deal context. | `crm_deals_get`, `crm_activities_create`, `email_campaigns_create` | **P1 / Pmacro** |
+| `sd-init` | Bootstrap a workspace: verify auth, snapshot brand profile + site list, write `.sd/config.json`. Idempotent. | `whoami`, `profile_get`, `branding_list_profiles`, `sites_list`, `block_templates_list`, `email_templates_list` | ✓ |
+| `sd-learn` | Capture user feedback into `.sd/learnings.md` so future skill runs consult it. | (no MCP) | ✓ |
+| `sd-find-skill` | Catalog browser. Tells you what bundles exist, what they cover, and helps install on demand. The escape hatch for the "I want a small footprint" case. | (none — reads this repo's manifest) | 💡 **P0** |
 
 ---
 
-## 3. Company Brain (knowledge layer)
+## Tier 2 · Atomic creators (already shipped — keep)
 
-Big surface, especially around notes, relationships, and the review queue. The `sd-brain-*` skills referenced in some skill catalogs are not in this repo yet — listing them here as the canonical roadmap.
+These work today, have clean triggers, and people remember them ("draft a page about X"). No reason to collapse into a bundle. Treat them as the always-on creator front-door.
 
-| Proposed skill | What it does | MCP tools | Priority |
+| Skill | What it does | MCP tools | Status |
 |---|---|---|---|
-| `sd-brain-note` | Capture a structured note (raw or from a template); auto-tags + links to related entities. | `brain_create_note`, `brain_upsert_note_by_url`, `brain_update_note`, `brain_create_note_from_template` | **P0** |
-| `sd-brain-meeting` | Record a meeting (attendees, agenda, outcomes); link to deals/contacts/posts. | `brain_create_meeting`, `brain_link_meeting`, `brain_get_meeting` | **P0** |
-| `sd-brain-ask` | Natural-language Q&A over the Brain with answer + cited notes. | `brain_search`, `brain_get_note`, `brain_list_notes` | **P0** |
-| `sd-brain-dashboard` | Daily/weekly digest: recent notes, tasks due, review queue, saved-search hits. | `brain_dashboard_summary`, `brain_list_tasks`, `brain_list_review_items` | **P1** |
-| `sd-brain-template` | Create / update / list note templates for repeated note shapes (standups, retros, 1:1s). | `brain_create_note_template`, `brain_list_note_templates`, `brain_update_note_template` | **P1** |
-| `sd-brain-relationships` | Build / query the relationship graph: link note ↔ contact ↔ deal ↔ company; traverse. | `brain_create_relationship`, `brain_list_relationships`, `brain_update_relationship` | **P1** |
-| `sd-brain-review-queue` | Walk the LLM-proposed-notes review queue; bulk approve/reject with reason. | `brain_list_review_items`, `brain_approve_review_item`, `brain_reject_review_item` | **P1** |
-| `sd-brain-saved-search` | Create / schedule / consume saved searches; route hits to email or kanban. | `brain_create_saved_search`, `brain_list_saved_searches`, `brain_update_saved_search` | **P2** |
-| `sd-brain-record-decision` | Capture ADR-style decision records with rationale and reversibility. | `brain_create_note` (with decision template), `brain_create_relationship` | **P0** |
-| `sd-brain-define-term` | Glossary entries: term, definition, aliases, owners. Bulk import supported. | `brain_create_note` + a glossary template | **P1** |
-| `sd-brain-promote-to-document` | Convert a cluster of related notes into a polished published doc. | `brain_list_notes`, `brain_search`, `posts_create` | **P2 / Pmacro** |
-| `sd-brain-kickoff-initiative` | Spin up a project initiative: scope note + tasks + kanban project + members. | `brain_create_note`, `brain_create_task`, `projects_create`, `kanban_create_card` | **P1 / Pmacro** |
-| `sd-brain-add-person` | Add a person to the Brain with their roles, expertise, and existing CRM links. | `brain_create_note`, `brain_create_relationship`, `crm_contacts_search/update` | **P2** |
-| `sd-brain-find-expert` | Given a topic, surface the people who know it (per Brain links + notes). | `brain_search`, `brain_list_relationships` | **P2** |
-| `sd-brain-organize-topics` | Cluster orphan notes into topic groups; reduce review-queue noise. | `brain_list_notes`, `brain_create_relationship`, `brain_bulk_update_notes` | **P2** |
-| `sd-brain-create-playbook` / `sd-brain-run-playbook` | Author and execute repeatable "do X every time Y" playbooks. | `brain_create_note_template`, `brain_create_task`, `automations_create` | **P2** |
+| `sd-create-page` | Draft a CMS page with blocks. | `posts_create`, `taxonomies_*`, `block_templates_list` | ✓ |
+| `sd-create-deck` | Draft a multi-slide pitch deck. | `decks_create`, `decks_replace_slides`, `decks_publish_all`, `branding_get_profile` | ✓ |
+| `sd-create-email` | Draft an email campaign. | `email_campaigns_create`, `email_lists`, `email_templates_list`, `email_segments_*` | ✓ |
+| `sd-create-survey` | Draft a survey / form / intake. | `surveys_create`, `surveys_update` | ✓ |
+| `sd-create-booking-page` | Create a booking page or embed an existing one. | `booking_pages_*` | ✓ |
+| `sd-create-website` | Compose a full multi-page site end-to-end. | `posts_create` (xN), `nav_create`, `sites_update` | ✓ |
+| `sd-build-html-embed` | Upload single-file or zipped HTML as an embed page / single-slide deck. | `posts_upload_html(_zip)`, `decks_upload_html(_zip)` | ✓ |
 
 ---
 
-## 4. Store / E-commerce
+## Tier 3 · Domain bundles (one skill per domain, internal sub-modes)
 
-Zero skills currently. The portal has full product, order, customer, discount, gift-cert, and review coverage.
+Each bundle is **one** skill. The SKILL.md routes between sub-modes based on the prompt. This is the right home for everything that previously would have been an atomic skill.
 
-| Proposed skill | What it does | MCP tools | Priority |
+### `sd-crm` 💡 **P0**
+
+Everything CRM: contacts, companies, deals, pipelines, custom fields, activities, search.
+
+- **Sub-modes:** `create-contact`, `create-company`, `create-deal`, `move-stage`, `search`, `custom-fields-setup`, `import`, `followup-email`
+- **MCP tools:** `crm_contacts_*`, `crm_companies_*`, `crm_deals_*`, `crm_pipelines_*`, `crm_activities_*`, `crm_custom_fields_*`, `crm_custom_field_values_*`, `crm_deal_comments_*`, `crm_deal_artifact_*`, `crm_saved_views_list`, `crm_scoring_rules_list`
+
+### `sd-brain` 💡 **P0**
+
+The Company Brain: notes, meetings, decisions, glossary, relationships, search, review queue, playbooks.
+
+- **Sub-modes:** `note` (incl. decision / glossary templates), `meeting`, `ask`, `dashboard`, `template`, `relationships`, `review-queue`, `saved-search`, `find-expert`, `organize-topics`, `playbook` (create + run), `add-person`
+- **MCP tools:** all `brain_*` (~30 tools)
+
+### `sd-store` 💡 **P1**
+
+E-commerce: products, variants, options, inventory, discounts, gift certs, customer care, reviews, orders.
+
+- **Sub-modes:** `create-product`, `create-category`, `create-discount`, `customer-care`, `reviews-moderate`, `orders-report`, `restock`, `issue-gift-certs`, `import`
+- **MCP tools:** `store_products_*`, `store_product_options_*`, `store_product_variants_*`, `store_categories_*`, `store_discounts_*`, `store_orders_*`, `store_customers_*`, `store_customer_messages_*`, `store_reviews_*`, `store_settings_get`, `gift_certificates_*`
+
+### `sd-pm` 💡 **P1**
+
+Projects, kanban boards, sprints, time tracking, recurring tasks, card templates.
+
+- **Sub-modes:** `create-project`, `create-board`, `create-card`, `sprint-plan`, `sprint-retro`, `time-report`, `recurring`, `artifact-link`, `card-template`
+- **MCP tools:** `projects_*`, `project_members_*`, `kanban_*` (all card / column / checklist / label / template / recurrence tools), `sprints_*`, `my_tasks_list`, `kanban_propose_sprint`
+
+### `sd-tickets` 💡 **P1**
+
+Support / customer-facing ticketing.
+
+- **Sub-modes:** `create`, `triage`, `reply`, `to-card` (promote to kanban), `digest`
+- **MCP tools:** `tickets_*`
+
+### `sd-sales` 💡 **P0**
+
+Proposals, contracts, invoices, service catalog, service requests.
+
+- **Sub-modes:** `create-proposal`, `create-contract`, `service-catalog-setup`, `invoice-report`, `proposal-template`
+- **MCP tools:** `proposals_*`, `contracts_*`, `invoices_*`, `service_catalog_list`, `service_requests_*`
+
+### `sd-content-ops` 💡 **P0**
+
+Goes deeper on the existing CMS surface — editing, forking, custom post types, block templates, taxonomies, audits. (`sd-create-page` stays as the creator front-door; this bundle owns everything *after* creation.)
+
+- **Sub-modes:** `edit-page`, `fork-page`, `create-cpt`, `cpt-bulk-author`, `create-block-template`, `fork-block-template`, `taxonomy-bootstrap`, `page-audit`
+- **MCP tools:** `posts_get/update/fork/delete/list/list_revisions/set_taxonomies`, `post_types_*`, `block_templates_*`, `taxonomies_*`
+
+### `sd-deck-ops` 💡 **P0**
+
+Same idea for decks: editing, forking, generation from data.
+
+- **Sub-modes:** `edit-deck`, `fork-deck`, `deck-from-brain`, `add-slide`, `delete-deck`
+- **MCP tools:** `decks_get/update/fork/delete/add_slide/replace_slides/publish_slide/publish_all`
+
+### `sd-email-ops` 💡 **P1**
+
+Goes deeper on email beyond `sd-create-email`: lists, segments, templates, scheduling, A/B forks, recurring newsletters, list hygiene.
+
+- **Sub-modes:** `create-list`, `create-segment`, `email-template`, `fork-campaign`, `schedule`, `newsletter-recurring`, `list-cleanup`
+- **MCP tools:** `email_lists_*`, `email_subscribers_*`, `email_segments_*`, `email_templates_*`, `email_campaigns_fork/schedule/send/update/delete`
+
+### `sd-survey-ops` 💡 **P2**
+
+Edits, response handling, forking. Smaller — could fold into `sd-content-ops` if it doesn't justify its own bundle.
+
+- **Sub-modes:** `edit-survey`, `responses-report`, `fork-survey`
+- **MCP tools:** `surveys_get/update/fork/list_responses`
+
+### `sd-brand` 💡 **P1**
+
+Brand profiles, audits, contrast checks, messaging.
+
+- **Sub-modes:** `bootstrap` (from URL), `audit`, `check-contrast`, `messaging`, `fork-profile`
+- **MCP tools:** `branding_*`
+
+### `sd-site-admin` 💡 **P1**
+
+Site-level admin: nav, domains, env vars, custom code, hosting status.
+
+- **Sub-modes:** `nav-setup`, `nav-restructure`, `add-domain`, `env-vars`, `custom-code`, `hosting-status`, `site-update`
+- **MCP tools:** `nav_*`, `website_domains_*`, `website_env_vars_*`, `sites_*`, `hosting_*`
+
+### `sd-ops` 💡 **P2**
+
+Tenant-wide ops: automations, team management, approvals dashboard, AI credit reports, integrations, conversation mining, suggested-project handling.
+
+- **Sub-modes:** `automation`, `team-onboard`, `team-offboard`, `team-audit`, `approvals-dashboard`, `ai-usage-report`, `conversation-mining`, `integration-audit`, `suggested-projects`, `client-snapshot`, `client-update`
+- **MCP tools:** `automations_*`, `team_*`, `project_members_*`, `approvals_*`, `ai_conversations_*`, `ai_credits_*`, `integrations_*`, `suggested_projects_*`, `suggested_project_requests_create`, `client_get/update`
+
+### `sd-media` 💡 **P2**
+
+Media library bulk ops. Tiny — could live inside `sd-content-ops` if it doesn't grow.
+
+- **Sub-modes:** `bulk-upload`, `cleanup`
+- **MCP tools:** `media_*`
+
+---
+
+## Tier 4 · Macro orchestrators (opt-in)
+
+These compose the bundles + atoms into operator-level workflows. Each is one skill; the description teaches the LLM when to reach for it.
+
+| Skill | What it does | Composes | Priority |
 |---|---|---|---|
-| `sd-create-product` | Add a product with variants, options, inventory, categories, taxonomies. | `store_products_create`, `store_product_options_create`, `store_product_variants_create`, `store_categories_create/list`, `store_products_adjust_inventory` | **P0** |
-| `sd-create-store-category` | Hierarchical category bootstrap. | `store_categories_create/list` | **P1** |
-| `sd-product-launch` | One macro: product + landing page + email campaign + announcement post. | `store_products_create`, `posts_create`, `email_campaigns_create` | **P0 / Pmacro** |
-| `sd-create-discount` | Create a discount (code / automatic / BOGO) with date range and limits. | `store_discounts_create`, `store_discounts_toggle/delete` | **P1** |
-| `sd-store-promotion` | Discount + email blast + countdown landing page. | `store_discounts_create`, `email_campaigns_create/schedule`, `posts_create` | **P1 / Pmacro** |
-| `sd-issue-gift-certs` | Bulk issue gift certificates (sales / loyalty / refund replacement). | `gift_certificates_issue/list` | **P2** |
-| `sd-store-customer-care` | Handle inbound customer messages and order issues from one inbox. | `store_customer_messages_list/reply`, `store_orders_add_note`, `store_orders_update_status` | **P1** |
-| `sd-store-reviews-moderate` | Walk pending reviews; auto-approve safe, surface flagged for human review. | `store_reviews_list/moderate` | **P2** |
-| `sd-store-orders-report` | Daily/weekly orders + revenue + top-products digest. | `store_orders_list`, `invoices_list`, `store_products_list` | **P1** |
-| `sd-product-import` | Bulk import from Shopify CSV / Stripe products / pasted list. | `store_products_create` (xN), `store_categories_list` | **P2** |
-| `sd-inventory-restock` | Detect low-stock items; raise PO drafts or update inventory. | `store_products_list/get`, `store_products_adjust_inventory` | **P2** |
+| `sd-launch-client` | Full new-tenant kickoff: brand → site → nav → 5 starter pages → email list → booking page → 2 sample services/products → welcome automation. | most of Tier 2 + `sd-brand`, `sd-site-admin`, `sd-store`, `sd-email-ops` | **P0** |
+| `sd-quote-to-close` | Sales-to-cash in one chat: contact → deal → proposal → contract → invoice → kickoff. | `sd-crm` + `sd-sales` + `sd-pm` | **P0** |
+| `sd-quarter-review` | Auto-generated QBR deck + email for a client: closed deals, open pipeline, completed projects, store revenue, Brain highlights. | `sd-crm` + `sd-pm` + `sd-store` + `sd-brain` + `sd-create-deck` + `sd-create-email` | **P1** |
+| `sd-monthly-digest` | Monthly tenant digest published as a post + email. | `sd-store` + `sd-crm` + `sd-tickets` + `sd-brain` + `sd-create-page` + `sd-create-email` | **P1** |
+| `sd-campaign-bundle` | Marketing campaign as one unit: landing page + email blast + survey + automation + sales-team deck. | `sd-create-page` + `sd-create-email` + `sd-create-survey` + `sd-ops` + `sd-create-deck` | **P1** |
+| `sd-handoff-package` | Package a deal/contact's full context (notes, deals, contracts, artifacts) into a portable doc. | `sd-crm` + `sd-brain` + `sd-sales` + `sd-create-page` | **P2** |
 
 ---
 
-## 5. Project Management (Kanban + Sprints + Projects)
+## Tier 5 · Cross-cutting infrastructure
 
-Surface includes full board / card / sprint / time-tracking primitives.
+Not skills, but shared building blocks the skills depend on. Keep in this repo as docs / shared modules.
 
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-create-project` | Spin up a project with members, default board, labels, artifacts. | `projects_create`, `project_members_set`, `kanban_create_column`, `kanban_labels_create` | **P0** |
-| `sd-create-kanban-board` | Initial column + label structure + card templates per board. | `kanban_create_column/update_column`, `kanban_labels_create`, `kanban_card_templates_create` | **P0** |
-| `sd-create-card` | Create a card with checklist, assignees, dependencies, time estimate. | `kanban_create_card`, `kanban_checklist_add`, `kanban_card_assign`, `kanban_card_add_blocker` | **P1** |
-| `sd-sprint-plan` | Propose a sprint; pull from backlog; balance capacity; create sprint and move cards. | `kanban_propose_sprint`, `sprints_create`, `kanban_move_card`, `kanban_list_board` | **P1** |
-| `sd-sprint-retro` | At sprint close: completed vs planned, time logged, carry-over, retro note in Brain. | `sprints_list`, `kanban_list_board`, `brain_create_note` | **P1 / Pmacro** |
-| `sd-recurring-tasks` | Set up recurring kanban cards (weekly standup, monthly billing, quarterly review). | `kanban_recurrences_create/list/delete` | **P2** |
-| `sd-time-report` | Aggregate logged time per project / client / member for invoicing. | `kanban_card_log_time`, `kanban_list_board`, `invoices_get` | **P1** |
-| `sd-card-from-ticket` | Convert a support ticket into a kanban card on the right board. | `tickets_get`, `kanban_create_card`, `kanban_card_artifact_link` | **P1 / Pmacro** |
-| `sd-project-artifact-link` | Bulk-link CRM / kanban / proposal artifacts onto a project page. | `projects_artifact_link`, `projects_artifacts_list` | **P2** |
-| `sd-card-templates` | Reusable card scaffolds (bug, feature, audit). | `kanban_card_templates_create/list/delete` | **P2** |
+- **`.sd/config.json` schema** — versioned; `sd-init` writes, others read.
+- **Brand snapshot** — cached profile in `.sd/config.json` so bundles don't re-fetch.
+- **Approval routing** — `.sd/approvals.json`: per-entity-type rule for auto-stage vs auto-apply (e.g. "always require human approval on `email_campaigns_send`").
+- **Telemetry hook** — every skill appends a one-liner to `.sd/skill-runs.log` for `sd-learn` to mine.
+- **Bundle convention doc** — `BUNDLE_AUTHORING.md` covering how to structure a sub-mode router inside one SKILL.md without re-implementing skill-selection logic.
 
 ---
 
-## 6. Tickets / Customer Support
+## Suggested build order
 
-Tickets are first-class but no skill ships yet.
+The P0 batch — biggest value-per-token unlock:
 
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-create-ticket` | Open a ticket on behalf of a customer; assign, prioritize. | `tickets_create/update` | **P1** |
-| `sd-triage-tickets` | Walk open tickets, classify by topic, route to projects, suggest replies. | `tickets_list/get/update`, `kanban_create_card`, `brain_search` | **P1** |
-| `sd-reply-ticket` | Compose a brand-voiced reply using prior thread + brain context. | `tickets_get/reply`, `brain_search` | **P1** |
-| `sd-ticket-to-card` | Promote ticket → kanban card on engineering board. | `tickets_get`, `kanban_create_card`, `kanban_card_artifact_link` | **P1 / Pmacro** |
-| `sd-ticket-digest` | Weekly support digest: volume, SLA breaches, top issues. | `tickets_list` | **P2** |
+1. `sd-find-skill` (P0) — small effort, immediately solves discoverability
+2. `sd-crm` bundle (P0)
+3. `sd-brain` bundle (P0)
+4. `sd-sales` bundle (P0)
+5. `sd-content-ops` bundle (P0)
+6. `sd-deck-ops` bundle (P0)
+7. `sd-launch-client` macro (P0) — depends on the above; the headliner demo
 
----
+After P0 lands, the platform has end-to-end coverage of the most common operator workflows in ~16 skills total (Tier 1 + Tier 2 atoms + the 6 P0 bundles + 1 P0 macro). Token budget stays around 2.5K per turn.
 
-## 7. Proposals · Contracts · Invoices · Service Catalog
+Then P1 (`sd-store`, `sd-pm`, `sd-tickets`, `sd-email-ops`, `sd-brand`, `sd-site-admin`, `sd-quote-to-close`, `sd-quarter-review`, `sd-monthly-digest`, `sd-campaign-bundle`) when demand justifies each one.
 
-Full sales-to-cash loop is exposed, no skills yet.
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-create-proposal` | Compose a branded proposal with line items from the service catalog. | `proposals_create/update/send`, `service_catalog_list`, `branding_get_profile` | **P0** |
-| `sd-create-contract` | Generate a contract from a proposal template; e-sign flow; voidable. | `contracts_create/get/void`, `proposals_get` | **P1** |
-| `sd-quote-to-close` | One macro: contact → deal → proposal → contract → invoice. | `crm_contacts_search`, `crm_deals_create`, `proposals_create`, `contracts_create`, `invoices_get` | **P0 / Pmacro** |
-| `sd-service-catalog-setup` | Bootstrap a productized-service menu with pricing tiers. | `service_catalog_list`, `service_requests_create` (admin), `store_products_create` | **P1** |
-| `sd-service-request-handler` | Inbound service requests → triage → ticket or project. | `service_requests_list/create`, `tickets_create`, `projects_create` | **P2** |
-| `sd-invoice-report` | Monthly invoice + revenue digest by client/category. | `invoices_list/get` | **P2** |
-| `sd-proposal-templates` | Save winning proposals as templates for reuse. | `proposals_get`, `block_templates_create` | **P2** |
+P2 last, or never if nobody asks.
 
 ---
 
-## 8. Email Marketing (beyond `sd-create-email`)
+## Migration from the previous 80-skill draft
 
-`sd-create-email` covers campaigns. The rest of the email surface is open.
+Earlier drafts of this roadmap proposed one skill per atomic operation (~80 skills). Everything from that draft is preserved here, just remapped into bundles:
 
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-create-list` | Create an email list + initial subscribers + opt-in form. | `email_lists_create`, `email_subscribers_add` | **P1** |
-| `sd-create-segment` | Build a smart segment from CRM + behavioral filters. | `email_segments_create/list`, `email_subscribers_list` | **P1** |
-| `sd-email-template` | Save / fork / publish reusable campaign templates. | `email_templates_create/list` | **P2** |
-| `sd-fork-campaign` | A/B fork a campaign with variant headlines/CTAs. | `email_campaigns_fork/update` | **P2** |
-| `sd-email-schedule` | Schedule with timezone-aware send windows. | `email_campaigns_schedule/send` | **P1** |
-| `sd-newsletter-recurring` | Auto-drive weekly newsletter from new Brain notes + blog posts. | `brain_list_notes`, `posts_list`, `email_campaigns_create/schedule` | **P1 / Pmacro** |
-| `sd-list-cleanup` | Find inactive subscribers / bounces and prune. | `email_subscribers_list/remove/update` | **P2** |
-
----
-
-## 9. Content (CMS) beyond `sd-create-page`
-
-Pages, taxonomies, CPTs, block templates.
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-edit-page` | Edit / restructure an existing page with surgical block updates. | `posts_get/update`, `posts_list_revisions` | **P0** |
-| `sd-fork-page` | Fork a high-performing page as a template for variants. | `posts_fork` | **P2** |
-| `sd-create-cpt` | Define a custom post type with fields, code, templates. | `post_types_create/update`, `post_types_fields_create/list`, `post_types_update_template/code` | **P1** |
-| `sd-cpt-bulk-author` | Given a CPT (e.g. case-study), bulk-author N posts from a brief or KB. | `posts_create` (xN), `post_types_get`, `crm_custom_field_values_set` | **P1** |
-| `sd-create-block-template` | Save a winning block pattern as a reusable template. | `block_templates_create/publish/update` | **P1** |
-| `sd-fork-block-template` | Fork-and-customize an existing template per tenant. | `block_templates_fork/get` | **P2** |
-| `sd-taxonomy-bootstrap` | Bootstrap category/tag tree for a new site. | `taxonomies_create_category/create_tag/list`, `posts_set_taxonomies` | **P2** |
-| `sd-page-audit` | Audit existing pages for SEO, brand voice, broken blocks. | `posts_list/get`, `branding_audit` | **P2** |
+| Previous atomic skill name | Lives now as |
+|---|---|
+| `sd-create-contact`, `sd-create-company`, `sd-create-deal`, `sd-pipeline-tracker`, `sd-deal-move-stage`, `sd-crm-import`, `sd-search-crm`, `sd-crm-custom-fields-setup`, `sd-deal-followup-email` | `sd-crm` sub-modes |
+| `sd-brain-note`, `sd-brain-meeting`, `sd-brain-ask`, `sd-brain-dashboard`, `sd-brain-template`, `sd-brain-relationships`, `sd-brain-review-queue`, `sd-brain-saved-search`, `sd-brain-record-decision`, `sd-brain-define-term`, `sd-brain-promote-to-document`, `sd-brain-kickoff-initiative`, `sd-brain-add-person`, `sd-brain-find-expert`, `sd-brain-organize-topics`, `sd-brain-create-playbook`, `sd-brain-run-playbook` | `sd-brain` sub-modes |
+| `sd-create-product`, `sd-create-store-category`, `sd-product-launch`, `sd-create-discount`, `sd-store-promotion`, `sd-issue-gift-certs`, `sd-store-customer-care`, `sd-store-reviews-moderate`, `sd-store-orders-report`, `sd-product-import`, `sd-inventory-restock` | `sd-store` sub-modes (+ `sd-product-launch` and `sd-store-promotion` are macros that call `sd-store` + `sd-create-page` + `sd-create-email`) |
+| `sd-create-project`, `sd-create-kanban-board`, `sd-create-card`, `sd-sprint-plan`, `sd-sprint-retro`, `sd-recurring-tasks`, `sd-time-report`, `sd-card-from-ticket`, `sd-project-artifact-link`, `sd-card-templates` | `sd-pm` sub-modes |
+| `sd-create-ticket`, `sd-triage-tickets`, `sd-reply-ticket`, `sd-ticket-to-card`, `sd-ticket-digest` | `sd-tickets` sub-modes |
+| `sd-create-proposal`, `sd-create-contract`, `sd-service-catalog-setup`, `sd-service-request-handler`, `sd-invoice-report`, `sd-proposal-templates`, `sd-quote-to-close` (macro stays) | `sd-sales` sub-modes (+ `sd-quote-to-close` macro) |
+| `sd-create-list`, `sd-create-segment`, `sd-email-template`, `sd-fork-campaign`, `sd-email-schedule`, `sd-newsletter-recurring`, `sd-list-cleanup` | `sd-email-ops` sub-modes |
+| `sd-edit-page`, `sd-fork-page`, `sd-create-cpt`, `sd-cpt-bulk-author`, `sd-create-block-template`, `sd-fork-block-template`, `sd-taxonomy-bootstrap`, `sd-page-audit` | `sd-content-ops` sub-modes |
+| `sd-edit-deck`, `sd-fork-deck`, `sd-deck-from-brain` | `sd-deck-ops` sub-modes |
+| `sd-edit-survey`, `sd-survey-responses-report`, `sd-fork-survey` | `sd-survey-ops` sub-modes (or folded into `sd-content-ops`) |
+| `sd-brand-bootstrap`, `sd-brand-audit`, `sd-brand-check-contrast`, `sd-brand-messaging`, `sd-brand-fork-profile` | `sd-brand` sub-modes |
+| `sd-create-automation`, `sd-automation-templates`, `sd-team-onboard`, `sd-team-offboard`, `sd-team-audit`, `sd-approvals-dashboard`, `sd-ai-usage-report`, `sd-conversation-mining`, `sd-integration-audit`, `sd-suggested-projects`, `sd-client-snapshot`, `sd-client-update` | `sd-ops` sub-modes |
+| `sd-add-custom-domain`, `sd-env-vars`, `sd-custom-code`, `sd-site-update`, `sd-nav-setup`, `sd-nav-restructure`, `sd-hosting-status` | `sd-site-admin` sub-modes |
+| `sd-media-bulk-upload`, `sd-media-cleanup` | `sd-media` sub-modes (or folded into `sd-content-ops`) |
+| `sd-bookings-digest`, `sd-bookings-manage` | (small) — fold into `sd-create-booking-page` or into `sd-ops` |
 
 ---
 
-## 10. Decks beyond `sd-create-deck`
+## Bundle authoring convention
 
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-edit-deck` | Edit individual slides; reorder; restructure without rebuilding. | `decks_get`, `decks_add_slide`, `decks_replace_slides`, `decks_publish_slide` | **P0** |
-| `sd-fork-deck` | Fork a winning deck as a template for sales teams. | `decks_fork` | **P1** |
-| `sd-deck-from-brain` | Generate a quarterly-review or capabilities deck from Brain notes + CRM. | `brain_search`, `crm_deals_list`, `decks_create/replace_slides` | **P1 / Pmacro** |
-| `sd-deck-html-upload` | Drop a Figma export / hi-fi HTML straight into a deck. | `decks_upload_html/_zip` | ✓ via sd-build-html-embed |
+When building a bundle, structure the `SKILL.md` so it:
 
----
+1. **Front-loads the sub-mode list** in the description (so the LLM can pattern-match the user prompt to the right sub-mode without loading the body).
+2. **Body opens with a sub-mode router** — explicit "if the user says X, do sub-mode Y" rules, then the per-mode instructions.
+3. **Shares helpers across sub-modes** — brand snapshot lookup, MCP error handling, approval routing — kept at the top of the body so each sub-mode reads them once.
+4. **Logs to `.sd/skill-runs.log`** at the end of each invocation with `{ skill, submode, outcome }`.
 
-## 11. Surveys beyond `sd-create-survey`
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-edit-survey` | Edit existing surveys: add fields, rewire branching, change scoring. | `surveys_get/update` | **P1** |
-| `sd-survey-responses-report` | Pull responses, score, route hot leads to CRM. | `surveys_list_responses`, `crm_contacts_create/update`, `crm_deals_create` | **P1 / Pmacro** |
-| `sd-fork-survey` | Fork a survey to A/B copy or branching changes. | `surveys_fork` | **P2** |
+A `BUNDLE_AUTHORING.md` doc lives in this repo and walks through a worked example.
 
 ---
 
-## 12. Bookings beyond `sd-create-booking-page`
+## How to contribute
 
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-bookings-digest` | Daily bookings digest with conflicts and prep notes. | `bookings_list/get`, `brain_create_note` | **P1** |
-| `sd-bookings-manage` | Cancel / reschedule / update bookings with notification. | `bookings_cancel/update`, `crm_activities_create` | **P2** |
-
----
-
-## 13. Branding
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-brand-bootstrap` | Generate a brand profile from a URL or pasted brief; color + font sampling. | `branding_create_profile/update_profile` | **P0** |
-| `sd-brand-audit` | Audit brand consistency across pages, decks, emails; surface drift. | `branding_audit`, `posts_list`, `decks_list`, `email_campaigns_list` | **P1** |
-| `sd-brand-check-contrast` | Run accessibility contrast checks against brand profile colors. | `branding_check_contrast` | **P2** |
-| `sd-brand-messaging` | Author / update brand messaging (tone, taglines, value props). | `branding_update_messaging`, `branding_get_messaging` | **P1** |
-| `sd-brand-fork-profile` | Fork a brand profile for sub-brands or campaigns. | `branding_create_profile`, `branding_get_profile` | **P2** |
-
----
-
-## 14. Automations
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-create-automation` | Author a trigger → conditions → actions workflow with NL → spec → review. | `automations_create/update/list/toggle/delete` | **P1** |
-| `sd-automation-templates` | Library of common automations (welcome flow, abandoned cart, lead-routing, etc.). | `automations_create` | **P1** |
-
----
-
-## 15. Site administration (Domains · Env Vars · Custom Code)
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-add-custom-domain` | Add a domain with DNS verification walkthrough. | `website_domains_add/list/remove` | **P1** |
-| `sd-env-vars` | Batch set/list/delete env vars per site (analytics IDs, API keys). | `website_env_vars_set/list/delete` | **P1** |
-| `sd-custom-code` | Inject site-wide custom HTML/CSS/JS (marketing pixels, A11y widgets). | `sites_update_custom_code`, `sites_get_custom_code`, `sites_publish_custom_code` | **P2** |
-| `sd-site-update` | Rename a site, swap default website, change agency white-label colors. | `sites_update`, `client_update` | **P2** |
-
----
-
-## 16. Site navigation
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-nav-setup` | Build a multi-level top-nav for a new site from page list. | `nav_create/publish_all`, `posts_list` | **P1** |
-| `sd-nav-restructure` | Bulk reorg of existing nav: drag tree changes via prompt. | `nav_list/update/publish` | **P2** |
-
----
-
-## 17. Media
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-media-bulk-upload` | Upload a folder / URL list with auto-tag and category. | `media_register/upload_from_url`, `media_list` | **P1** |
-| `sd-media-cleanup` | Find unreferenced media; archive or delete. | `media_list/delete`, `posts_list` | **P2** |
-
----
-
-## 18. Team & access
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-team-onboard` | Invite a teammate + set role + add to projects + grant MCP token. | `team_invite/update_role`, `project_members_set` | **P1** |
-| `sd-team-offboard` | Revoke roles + remove from projects + audit attribution. | `team_remove_member`, `project_members_remove`, `kanban_card_assignees_list` | **P1** |
-| `sd-team-audit` | List members, last activity, scope of access. | `team_list_members`, `ai_conversations_list` | **P2** |
-
----
-
-## 19. Approvals
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-approvals-dashboard` | Walk pending approvals, batch approve safe ones, route risky to human. | `approvals_list/get/approve/reject` | **P1** |
-| `sd-approvals-policy` | Set per-entity-type approval policies (auto-approve / always review). | `approvals_list` + portal API extension | **P2** |
-
----
-
-## 20. AI / Conversations / Credits
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-ai-usage-report` | Monthly AI credits ledger digest by user / feature; cost attribution. | `ai_credits_balance/ledger` | **P1** |
-| `sd-conversation-mining` | Pull AI conversations for the period; extract decisions/action items into Brain. | `ai_conversations_list/get`, `brain_create_note`, `brain_create_task` | **P1 / Pmacro** |
-| `sd-credit-low-alert` | Trigger when balance falls below a threshold. | `ai_credits_balance` | **P2** |
-
----
-
-## 21. Integrations
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-integration-audit` | List all integrations, revoke stale ones, surface scope drift. | `integrations_list/revoke` | **P2** |
-
----
-
-## 22. Hosting
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-hosting-status` | Hosting plan summary per site; usage and limits. | `hosting_list/get` | **P2** |
-
----
-
-## 23. Client (whole-tenant) operations
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-client-snapshot` | Whole-tenant snapshot: brand, sites, lists, pipelines, products, projects — for audits or duplication. | `client_get`, `branding_list_profiles`, `sites_list`, `email_lists`, `crm_pipelines_list`, `store_products_list`, `projects_list` | **P1** |
-| `sd-client-update` | Update client-level settings (timezone, white-label, agency name). | `client_update` | **P2** |
-
----
-
-## 24. Suggested Projects
-
-| Proposed skill | What it does | MCP tools | Priority |
-|---|---|---|---|
-| `sd-suggested-projects` | Surface AI-suggested projects; promote to real projects with kickoff. | `suggested_projects_list`, `suggested_project_requests_create`, `projects_create` | **P2 / Pmacro** |
-
----
-
-## 25. Macro / orchestration skills
-
-These compose multiple sibling skills into one operator-level workflow.
-
-| Proposed skill | What it does | Composes | Priority |
-|---|---|---|---|
-| `sd-launch-client` | Full new-tenant kickoff: brand → site → nav → 5 starter pages → email list → booking page → 2 sample services/products → welcome automation. | most of the `sd-create-*` family | **P0 / Pmacro** |
-| `sd-quarter-review` | Auto-generated QBR for a client: deals closed, deals open, completed projects, store revenue, key Brain decisions. Output is a deck + email. | `crm_*`, `projects_*`, `store_orders_list`, `brain_*`, `decks_create` | **P1 / Pmacro** |
-| `sd-monthly-digest` | Monthly tenant digest: orders, leads, completed tickets, brain highlights → email + post. | `store_orders_list`, `crm_*`, `tickets_list`, `brain_*`, `email_campaigns_create` | **P1 / Pmacro** |
-| `sd-campaign-bundle` | Marketing campaign as one unit: landing page + email blast + survey + automation + deck for sales team. | `posts_create`, `email_campaigns_create`, `surveys_create`, `automations_create`, `decks_create` | **P1 / Pmacro** |
-| `sd-handoff-package` | Package a deal/contact's full context (notes, deals, contracts, artifacts) into a portable doc for handoff. | `crm_*`, `brain_*`, `contracts_get`, `posts_create` | **P2 / Pmacro** |
-
----
-
-## 26. Cross-cutting infrastructure
-
-Not skills exactly, but supporting building blocks the skills will need.
-
-- **`.sd/config.json` schema versioning** — bump as new skills add fields.
-- **Brand profile snapshot** — keep brand colors / fonts / tone close at hand to reduce per-call MCP fetches.
-- **Approval routing config** — `.sd/approvals.json` so each skill knows which writes auto-stage vs auto-apply.
-- **Telemetry hook** — every skill emits a one-line tracelog to `.sd/skill-runs.log` for `sd-learn` to mine.
-- **Skill-versioning convention** — bump `version:` in each `SKILL.md` frontmatter so the portal can compatibility-check.
-
----
-
-## 27. Suggested build order
-
-Next batch (~5 skills, biggest gap-fill / unlocks the most):
-
-1. `sd-create-contact` (P0)
-2. `sd-create-deal` + `sd-create-company` (P0)
-3. `sd-brain-note` + `sd-brain-meeting` (P0)
-4. `sd-create-product` (P0)
-5. `sd-create-project` + `sd-create-kanban-board` (P0)
-6. `sd-create-proposal` (P0)
-7. `sd-edit-page` and `sd-edit-deck` (P0 — closes the round-trip on existing creators)
-
-Macro on the horizon:
-
-- `sd-launch-client` — the headliner. Once the P0 set lands, this becomes feasible and is the most impressive demo of the SD stack.
-- `sd-quote-to-close` — full sales-to-cash flow in one chat.
-- `sd-quarter-review` — auto-generated QBR is a great upsell.
-
----
-
-## How to contribute a skill
-
-1. Pick a row marked 💡 above.
-2. Open a draft PR adding a new directory `<skill-name>/SKILL.md` following the existing skill format (frontmatter + body).
-3. Wire the SKILL.md so it references the MCP tools listed in the table.
-4. Add a row to `README.md`'s skill table.
+1. Pick a 💡 row above.
+2. If it's a bundle, scaffold the bundle directory + `SKILL.md` with the sub-mode router pattern.
+3. If it's a macro, scaffold the macro directory + a `SKILL.md` that lists which Tier 2/3 skills it expects to be installed (and bails gracefully if not).
+4. Update `README.md`'s skill table.
 5. Update this `ROADMAP.md` — flip the row from 💡 to ✓ and link the PR.
 
-PRs welcome from anyone — internal team or external contributors.
+PRs welcome from anyone.
