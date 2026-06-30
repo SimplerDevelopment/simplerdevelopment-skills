@@ -230,7 +230,7 @@ The rule: **never render white text on an accent color without running `branding
 ### B. Verify the trap with the tool
 
 ```
-mcp__simplerdevelopment-postcaptain__branding_check_contrast {
+mcp__simplerdevelopment__branding_check_contrast {
   "foreground": "#FFFFFF",
   "background": "#06B6D4"   // the brand's accentColor
 }

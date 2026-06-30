@@ -1,6 +1,6 @@
 ---
 name: sd-create-email
-description: Draft an email campaign (announcement, newsletter, nurture, welcome) in the SimplerDevelopment portal via the postcaptain MCP. Produces a campaign tied to an email list, applying the default brand profile, optionally composing from existing email_templates, and returns a shareable approval URL so the author can hand it to a stakeholder for content review BEFORE the campaign ships. Approval records a "ready" stamp but does NOT auto-send — the actual send is a separate explicit action (email_campaigns_send). Sourcing material is OPTIONAL and user-driven — the skill asks where to pull from if unclear (postcaptain-kb, an external URL, a pasted brief, or just the user's prompt). Use when the user says 'draft an email about X', 'create a campaign for Y', 'write a newsletter on Z', 'announcement email for W', 'nurture email'. Default mode publishes a DRAFT (`status: draft`); requires a sd-init `.sd/config.json`.
+description: Draft an email campaign (announcement, newsletter, nurture, welcome) in the SimplerDevelopment portal via the SimplerDevelopment MCP. Produces a campaign tied to an email list, applying the default brand profile, optionally composing from existing email_templates, and returns a shareable approval URL so the author can hand it to a stakeholder for content review BEFORE the campaign ships. Approval records a "ready" stamp but does NOT auto-send; sending is a separate explicit action. Sourcing material is optional and user-driven: the user's prompt, an external URL, a pasted brief, or a local file. Use when the user says 'draft an email about X', 'create a campaign for Y', 'write a newsletter on Z', 'announcement email for W', 'nurture email'. Default mode publishes a DRAFT (`status: draft`); requires a sd-init `.sd/config.json`.
 user-invocable: true
 allowed-tools: Read, Write, Bash, WebFetch, Glob, Grep
 ---
@@ -17,7 +17,7 @@ Draft an email campaign in the portal. The campaign is created in draft status, 
 2. **Read brand messaging** — emails lean heavily on `toneOfVoice`, `valueProposition`, `keyDifferentiators`, `boilerplate`.
 3. **Read `SD_DESIGN_PRINCIPLES.md`** — section 9 has the email-specific tweaks (`<table>` layouts, inline styles, max-width 600px, 16px body, max 40px logo height).
 4. **Read `.sd/learnings.md`** if present — apply `## Active rules`. Pay extra attention to email-specific rules since deliverability gotchas accumulate fast (e.g. "client X doesn't want emoji in subject lines," "campaigns to list Y always go from hello@, not the personal address").
-5. **Identify the target list.** Ask the user which list the campaign goes to. List candidates with `mcp__simplerdevelopment-postcaptain__email_lists` (or `email_lists_create` for a brand-new list). Record `listId` — required for `email_campaigns_create`.
+5. **Identify the target list.** Ask the user which list the campaign goes to. List candidates with `mcp__simplerdevelopment__email_lists` (or `email_lists_create` for a brand-new list). Record `listId` — required for `email_campaigns_create`.
 6. **From-address sanity.** Resolve `fromName` and `fromEmail`. Prefer ones the tenant has already used in past campaigns (check `email_campaigns_list`). For a new tenant, ask explicitly — getting this wrong can land the campaign in spam.
 
 ## Sourcing — ASK if unclear
@@ -25,12 +25,11 @@ Draft an email campaign in the portal. The campaign is created in draft status, 
 Same options as `sd-create-page`:
 
 - **`prompt-only`** — write from prompt + brand voice (most common for nurture / short announcement emails).
-- **`postcaptain-kb`** — mine the postcaptain-kb vault. For SD-internal sends (newsletters, capability announcements).
 - **`url`** — fetch one or more URLs (e.g. announcement blog post, case study) and structure the email around it.
 - **`brief`** — read a local markdown/txt brief.
 - **`mixed`** — combine.
 
-**Do not silently use postcaptain-kb for client emails.** Flag if `client.id` is not the SD agency client and the user picked an SD-internal source.
+Do not silently add private/internal sources. Client-facing email should be grounded only in the user's prompt, files they provide, URLs they provide, and the tenant's own SimplerDevelopment MCP data.
 
 ## Authoring
 
@@ -62,7 +61,7 @@ Same options as `sd-create-page`:
 
    If `logoUrl` is null, use the styled wordmark variant of `logoText` in the brand accent color.
 
-7. **Footer.** Always include unsubscribe (the renderer injects `{{UNSUBSCRIBE_URL}}`). Include the company wordmark + a one-line address ("simplerdevelopment.com" or the physical address from the brand profile). Light-on-dark or dark-on-light — match the header's pattern.
+7. **Footer.** Always include unsubscribe (the renderer injects `{{UNSUBSCRIBE_URL}}`). Include the company wordmark + a tenant domain, website URL, or physical address from the brand profile. Light-on-dark or dark-on-light — match the header's pattern.
 
 8. **Run the email-specific contrast check.** All body text and button labels must pass 4.5:1. Buttons commonly fail when the background uses the brand `accentColor` — call `branding_check_contrast` for `button.style.color` vs `button.style.backgroundColor` and adjust if it fails.
 
@@ -75,7 +74,7 @@ Same options as `sd-create-page`:
 
 ## MCP call
 
-Call `mcp__simplerdevelopment-postcaptain__email_campaigns_create` with:
+Call `mcp__simplerdevelopment__email_campaigns_create` with:
 
 ```json
 {
@@ -131,7 +130,7 @@ The MCP response includes an `approval` envelope. Return to the user:
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

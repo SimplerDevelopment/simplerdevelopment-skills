@@ -143,7 +143,7 @@ After every run, invoke `sd-learn` with the user's feedback as the artifact ref 
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

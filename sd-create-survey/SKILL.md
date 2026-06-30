@@ -1,6 +1,6 @@
 ---
 name: sd-create-survey
-description: Draft a survey, form, intake questionnaire, or feedback poll in the SimplerDevelopment portal via the postcaptain MCP. Supports custom branching logic (showIf rules, page-jump branching, conditional options), per-field scoring (option_map / numeric / NPS), auto-route-to-CRM, recommendation engines, and brand-aware styling. Produces a `draft`-status survey, mints a shareable approval URL (approving flips status to `active` so the public /s/<slug> route accepts responses), and returns the survey id + public URL. Use when the user says 'create a survey about X', 'build an intake form for Y', 'set up a feedback poll', 'NPS survey', 'qualification questionnaire', 'lead-capture form', 'quiz-style assessment', 'multi-step form with branching'. Default mode publishes a DRAFT; requires a sd-init `.sd/config.json`.
+description: Draft a survey, form, intake questionnaire, or feedback poll in the SimplerDevelopment portal via the SimplerDevelopment MCP. Supports custom branching logic (showIf rules, page-jump branching, conditional options), per-field scoring (option_map / numeric / NPS), auto-route-to-CRM, recommendation engines, and brand-aware styling. Produces a `draft`-status survey, mints a shareable approval URL (approving flips status to `active` so the public /s/<slug> route accepts responses), and returns the survey id + public URL. Use when the user says 'create a survey about X', 'build an intake form for Y', 'set up a feedback poll', 'NPS survey', 'qualification questionnaire', 'lead-capture form', 'quiz-style assessment', 'multi-step form with branching'. Default mode publishes a DRAFT; requires a sd-init `.sd/config.json`.
 user-invocable: true
 allowed-tools: Read, Write, Bash, WebFetch, Glob, Grep
 ---
@@ -132,7 +132,7 @@ Apply via `surveys_update`:
 **Step 1 — create the draft:**
 
 ```
-mcp__simplerdevelopment-postcaptain__surveys_create {
+mcp__simplerdevelopment__surveys_create {
   title: "Q2 customer-fit intake",
   description: "Pre-discovery qualification form. 4 pages, branching by role + headcount.",
   fields: [ ...SurveyFieldDef[] ],
@@ -148,7 +148,7 @@ Returns `{ id, slug, ..., approval: { url, token, ... } }`.
 **Step 2 — patch in styling, scoring, recommendations, branding** (these fields aren't in the `surveys_create` input schema — they require a follow-up update):
 
 ```
-mcp__simplerdevelopment-postcaptain__surveys_update {
+mcp__simplerdevelopment__surveys_update {
   id: <from step 1>,
   brandingProfileId: <from .sd/config.json>,
   styling: { ... },
@@ -207,7 +207,7 @@ Or its aggregated results displayed via `survey-results` (only useful once respo
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

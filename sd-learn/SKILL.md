@@ -138,7 +138,7 @@ User: "Reject the deck variant — the cover slide should use the wide logo, not
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

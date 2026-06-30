@@ -28,7 +28,7 @@ Both flows return the public URL, the portal edit URL, and the approval URL. The
 
 ### 1. Discovery
 
-Call `mcp__simplerdevelopment-postcaptain__booking_pages_list` to enumerate what already exists. For each page, the response includes `id`, `slug`, `title`, `price`, `duration`, `active`, `assignmentMode`, `bookingType`.
+Call `mcp__simplerdevelopment__booking_pages_list` to enumerate what already exists. For each page, the response includes `id`, `slug`, `title`, `price`, `duration`, `active`, `assignmentMode`, `bookingType`.
 
 If multiple match the user's intent (e.g. several "discovery call" variants), ask which one. If none match, pivot to Flow B.
 
@@ -95,7 +95,7 @@ Booking pages send confirmation + host-notification + cancellation emails automa
 
 ## Flow B — author a new booking page via MCP
 
-Call `mcp__simplerdevelopment-postcaptain__booking_pages_create` with the minimum:
+Call `mcp__simplerdevelopment__booking_pages_create` with the minimum:
 
 ```json
 {
@@ -167,7 +167,7 @@ After every run where the user accepts or rejects the embed, invoke `sd-learn` w
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

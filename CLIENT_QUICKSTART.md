@@ -53,7 +53,7 @@ Open the installer page and click the button for your OS:
     | tar -xz -C ~/.claude/skills
   ```
 
-Each installer downloads the latest bundle (~45 KB), verifies the SHA-256
+Each installer downloads the latest bundle (including skill scripts and templates), verifies the SHA-256
 checksum, and extracts to `~/.claude/skills/`. No admin rights needed; the
 installer never writes outside your home directory.
 

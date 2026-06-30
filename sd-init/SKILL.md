@@ -11,13 +11,13 @@ One-shot setup for SimplerDevelopment portal MCP work. Run once per project; it'
 
 ## What this skill does
 
-1. **Verify MCP auth.** Calls `mcp__simplerdevelopment-postcaptain__whoami`. If unauthenticated, walk the user through adding the SD MCP server in their Claude Code config or claude.ai connector. Stop until auth works — every other step depends on it.
+1. **Verify MCP auth.** Calls `mcp__simplerdevelopment__whoami`. If unauthenticated, walk the user through adding the SD MCP server in their Claude Code config or claude.ai connector. Stop until auth works — every other step depends on it.
 
-2. **Resolve the active client + sites.** Call `mcp__simplerdevelopment-postcaptain__client_get` and `mcp__simplerdevelopment-postcaptain__sites_list`. If there's exactly one site, default to it. If there are multiple, ask the user which site is the "active" one for this project. Record both `clientId` and `defaultSiteId`.
+2. **Resolve the active client + sites.** Call `mcp__simplerdevelopment__client_get` and `mcp__simplerdevelopment__sites_list`. If there's exactly one site, default to it. If there are multiple, ask the user which site is the "active" one for this project. Record both `clientId` and `defaultSiteId`.
 
-3. **Resolve the default branding profile.** Call `mcp__simplerdevelopment-postcaptain__branding_list_profiles`. Pick the one with `isDefault: true`. If none exists, offer to create one with `mcp__simplerdevelopment-postcaptain__branding_create_profile` using whatever the user can give you (company name + primary color is the absolute minimum). If the user wants to skip this, don't proceed — every later content skill defaults to this profile, and skipping it leads to off-brand output.
+3. **Resolve the default branding profile.** Call `mcp__simplerdevelopment__branding_list_profiles`. Pick the one with `isDefault: true`. If none exists, offer to create one with `mcp__simplerdevelopment__branding_create_profile` using whatever the user can give you (company name + primary color is the absolute minimum). If the user wants to skip this, don't proceed — every later content skill defaults to this profile, and skipping it leads to off-brand output.
 
-4. **Pull the brand messaging snapshot.** Call `mcp__simplerdevelopment-postcaptain__branding_get_messaging` for the resolved profile. Capture: companyName, tagline, valueProposition, toneOfVoice, brandPersonality, keyDifferentiators, targetAudience, elevatorPitch, boilerplate. This is the source material future skills lean on; if any of those are empty, flag to the user with a one-line "your brand voice is sparse, content quality will suffer" warning — don't fix it inline (that's a separate workflow).
+4. **Pull the brand messaging snapshot.** Call `mcp__simplerdevelopment__branding_get_messaging` for the resolved profile. Capture: companyName, tagline, valueProposition, toneOfVoice, brandPersonality, keyDifferentiators, targetAudience, elevatorPitch, boilerplate. This is the source material future skills lean on; if any of those are empty, flag to the user with a one-line "your brand voice is sparse, content quality will suffer" warning — don't fix it inline (that's a separate workflow).
 
 5. **Pull the logo + asset snapshot.** From the same `branding_get_profile` response, capture the logo URLs: `logoUrl` (wide), `logoSquareUrl`, `logoRectUrl`, `logoIconUrl`, `logoText`, `logoAlt`. Skills under `sd-create-*` use these by default to brand every artifact they produce. If `logoUrl` is null, surface explicitly: "no wide logo on the brand profile — content will fall back to the wordmark; upload via `branding_update_profile` to elevate."
 
@@ -29,8 +29,8 @@ One-shot setup for SimplerDevelopment portal MCP work. Run once per project; it'
    Record the WCAG ratios in `.sd/config.json:brand.contrast`. If any pair fails 4.5:1 for body text or 3:1 for large/UI text, flag it — the failing pair becomes a `learnings.md` rule ("never put white on accent — fails contrast; use near-black instead").
 
 5. **Inventory reusable assets.**
-   - `mcp__simplerdevelopment-postcaptain__block_templates_list` — record `{ id, name, slug, category, scope }` for every published template.
-   - `mcp__simplerdevelopment-postcaptain__email_templates_list` — record `{ id, name, category }` for every email template.
+   - `mcp__simplerdevelopment__block_templates_list` — record `{ id, name, slug, category, scope }` for every published template.
+   - `mcp__simplerdevelopment__email_templates_list` — record `{ id, name, category }` for every email template.
    - Note which categories are present (hero, cta, footer, testimonials, etc.) and which are missing — the create skills check this list before inventing new blocks from scratch.
 
 6. **Seed the starter library (only if asked).** If the user explicitly says "set me up" or "seed templates", offer to create a starter pack:
@@ -125,7 +125,7 @@ A `.sd/config.json` file plus a 5-line summary printed to the user:
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

@@ -1,6 +1,6 @@
 ---
 name: sd-create-page
-description: Draft a CMS page (blog post, landing page, marketing page) in the SimplerDevelopment portal via the postcaptain MCP. Produces a structured `blocks` array applying the default brand profile, reuses existing block_templates where possible, and returns a shareable approval URL so the author can hand it to a stakeholder for review before publish. Sourcing material is OPTIONAL and user-driven — the skill asks where to pull from if unclear (postcaptain-kb, an external URL, a pasted brief, or just the user's prompt). Use when the user says 'draft a page about X', 'create a CMS page for Y', 'make a landing page for Z', 'new blog post on W', 'write a marketing page'. Default mode publishes a DRAFT (`published: false`); a sd-init `.sd/config.json` is required.
+description: Draft a CMS page (blog post, landing page, marketing page) in the SimplerDevelopment portal via the SimplerDevelopment MCP. Produces a structured `blocks` array applying the default brand profile, reuses existing block_templates where possible, and returns a shareable approval URL so the author can hand it to a stakeholder for review before publish. Sourcing material is optional and user-driven: the user's prompt, an external URL, a pasted brief, or a local file. Use when the user says 'draft a page about X', 'create a CMS page for Y', 'make a landing page for Z', 'new blog post on W', 'write a marketing page'. Default mode publishes a DRAFT (`published: false`); a sd-init `.sd/config.json` is required.
 user-invocable: true
 allowed-tools: Read, Write, Bash, WebFetch, Glob, Grep
 ---
@@ -21,14 +21,11 @@ Draft a CMS page (blog post, landing page, marketing entry) in the portal. The p
 The user's prompt may already make the source obvious. Skip the question when it is. Otherwise ask which source the page should draw from:
 
 - **`prompt-only`** — write from the user's prompt + brand voice. No external research.
-- **`postcaptain-kb`** — mine the postcaptain-kb Obsidian vault (uses the same conventions as the `draft-blog-post` skill: `discoveries/`, `sources/`, vault search).
 - **`url`** — fetch one or more URLs the user provides (WebFetch). Use for "turn this article into a landing page" or "competitor X published this — write our take".
 - **`brief`** — read a local file path (markdown, txt) the user points to. Use for "use the brief at `./briefs/foo.md`".
 - **`mixed`** — any combination of the above.
 
-**Do not silently default to postcaptain-kb.** That source is sd-internal — for client work, it'll inject the wrong voice.
-
-If the source is `postcaptain-kb` but `.sd/config.json:client.id` is NOT the SD agency client, flag this loudly: "you've selected an internal-knowledge source for a client project — confirm this is intentional."
+Do not silently add private/internal sources. Client-facing output should be grounded only in the user's prompt, files they provide, URLs they provide, and the tenant's own SimplerDevelopment MCP data.
 
 ## Authoring
 
@@ -65,7 +62,7 @@ If the source is `postcaptain-kb` but `.sd/config.json:client.id` is NOT the SD 
 
 ## MCP call
 
-Call `mcp__simplerdevelopment-postcaptain__posts_create` with:
+Call `mcp__simplerdevelopment__posts_create` with:
 
 ```json
 {
@@ -106,7 +103,7 @@ The MCP response includes an `approval` envelope:
   "slug": "...",
   ...,
   "approval": {
-    "url": "https://simplerdevelopment.com/approve/<token>",
+    "url": "https://<your-tenant>.simplerdevelopment.com/approve/<token>",
     "previewUrl": "<same>",
     "token": "<64-hex>",
     "status": "pending",
@@ -123,7 +120,7 @@ Return to the user:
 
 ## Iteration
 
-If the user wants edits, call `mcp__simplerdevelopment-postcaptain__posts_update` with the same post id. **Each update mints a fresh approval URL** (the reviewer should see the content as-of-mint-time, not as-of-an-older-approval). The old URL stays valid in its existing state (`pending`, `approved`, or `rejected`); the new one supersedes it for review purposes. Return the new URL each time.
+If the user wants edits, call `mcp__simplerdevelopment__posts_update` with the same post id. **Each update mints a fresh approval URL** (the reviewer should see the content as-of-mint-time, not as-of-an-older-approval). The old URL stays valid in its existing state (`pending`, `approved`, or `rejected`); the new one supersedes it for review purposes. Return the new URL each time.
 
 For a major rework or a parallel variant — call `posts_fork` to spin a clean variant under a new id with its own approval URL.
 
@@ -137,7 +134,7 @@ For a major rework or a parallel variant — call `posts_fork` to spin a clean v
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

@@ -126,7 +126,7 @@ The same WCAG rules from `SD_DESIGN_PRINCIPLES.md` apply:
 3. Verify size ≤ 1 MB (`wc -c index.html`).
 4. Base64-encode the whole file and call `posts_upload_html`:
    ```
-   mcp__simplerdevelopment-postcaptain__posts_upload_html {
+   mcp__simplerdevelopment__posts_upload_html {
      websiteId: <defaultSiteId>,
      filename: "<slug>.html",
      contentBase64: "<base64 of index.html>"
@@ -154,7 +154,7 @@ The same WCAG rules from `SD_DESIGN_PRINCIPLES.md` apply:
    base64 -i .sd/embeds/<slug>.zip -o /tmp/sd-zip.b64
    ```
    ```
-   mcp__simplerdevelopment-postcaptain__posts_upload_html_zip {
+   mcp__simplerdevelopment__posts_upload_html_zip {
      websiteId: <defaultSiteId>,
      filename: "<slug>.zip",
      contentBase64: "<paste of /tmp/sd-zip.b64>"
@@ -230,7 +230,7 @@ After every run where the user accepts or rejects the result, invoke `sd-learn` 
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

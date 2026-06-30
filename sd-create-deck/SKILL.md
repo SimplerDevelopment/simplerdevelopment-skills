@@ -1,6 +1,6 @@
 ---
 name: sd-create-deck
-description: Draft a pitch deck (presentation, slideshow, sales deck, investor deck) in the SimplerDevelopment portal via the postcaptain MCP. Produces a multi-slide V2 deck applying the default brand profile (theme inherited from the brand profile by default), reuses existing block_templates as slide layouts, and returns a shareable approval URL for stakeholder review before publish. Sourcing material is OPTIONAL and user-driven — the skill asks where to pull from if unclear (postcaptain-kb, an external URL, a pasted brief, or just the user's prompt). Use when the user says 'draft a deck about X', 'create a pitch deck for Y', 'make a presentation on Z', 'build a sales deck for W', 'investor deck'. Default mode publishes a DRAFT (`status: draft`); requires a sd-init `.sd/config.json`.
+description: Draft a pitch deck (presentation, slideshow, sales deck, investor deck) in the SimplerDevelopment portal via the SimplerDevelopment MCP. Produces a multi-slide V2 deck applying the default brand profile, reuses existing block_templates as slide layouts, and returns a shareable approval URL for stakeholder review before publish. Sourcing material is optional and user-driven: the user's prompt, an external URL, a pasted brief, or a local file. Use when the user says 'draft a deck about X', 'create a pitch deck for Y', 'make a presentation on Z', 'build a sales deck for W', 'investor deck'. Default mode publishes a DRAFT (`status: draft`); requires a sd-init `.sd/config.json`.
 user-invocable: true
 allowed-tools: Read, Write, Bash, WebFetch, Glob, Grep
 ---
@@ -22,12 +22,11 @@ Draft a pitch deck in the portal. The deck is created in draft status with slide
 Same options as `sd-create-page`:
 
 - **`prompt-only`** — write from prompt + brand voice (most common for "make me a sales deck about X").
-- **`postcaptain-kb`** — mine the postcaptain-kb vault. Useful for SD-internal decks (services pitch, capabilities overview).
 - **`url`** — fetch one or more URLs (case study, white paper, blog post) and structure the deck around it.
 - **`brief`** — read a local markdown/txt brief.
 - **`mixed`** — combine.
 
-**Do not silently use postcaptain-kb for client decks.** Flag aggressively if `client.id` is not the SD agency client and the user picked an SD-internal source.
+Do not silently add private/internal sources. Client-facing decks should be grounded only in the user's prompt, files they provide, URLs they provide, and the tenant's own SimplerDevelopment MCP data.
 
 ## Slide planning
 
@@ -70,7 +69,7 @@ Pick the spine, list the slides, then author one slide at a time.
 
 Two-step:
 
-1. **Create the deck** with `mcp__simplerdevelopment-postcaptain__decks_create`:
+1. **Create the deck** with `mcp__simplerdevelopment__decks_create`:
 
    ```json
    {
@@ -82,7 +81,7 @@ Two-step:
 
    The response includes the new deck's `id` and an `approval` envelope. **The deck is still empty after this call** — slides come next.
 
-2. **Replace slides in one shot** with `mcp__simplerdevelopment-postcaptain__decks_replace_slides`. Preferred over `decks_add_slide` (one round-trip, all slides) unless you're incrementally appending to an existing deck:
+2. **Replace slides in one shot** with `mcp__simplerdevelopment__decks_replace_slides`. Preferred over `decks_add_slide` (one round-trip, all slides) unless you're incrementally appending to an existing deck:
 
    ```json
    {
@@ -140,7 +139,7 @@ Return to the user:
 
 ## Install
 
-This skill ships as part of the SimplerDevelopment client skills bundle. Install all 10 sibling skills in one step from the portal:
+This skill ships as part of the SimplerDevelopment client skills bundle. Install the full skill bundle in one step from the portal:
 
 **https://simplerdevelopment.com/install**
 

@@ -13,7 +13,7 @@ Instead, this roadmap groups by domain. One `sd-crm` skill with internal sub-mod
 | Profile | Skills | Approx tokens / turn |
 |---|---|---|
 | **Minimal** — `sd-init` + `sd-learn` + `sd-find-skill` | 3 | ~500 |
-| **Existing atoms (today)** — the 9 shipped | 9 | ~1,500 |
+| **Existing atoms (today)** — the shipped client skills | 11 | ~1,800 |
 | **Full bundle set** — atoms + all 10 domain bundles + macros | ~24 | ~3,500 |
 | **Naive atomic (avoid)** — one skill per MCP tool | 80+ | 12,000–15,000 |
 
@@ -48,6 +48,8 @@ These work today, have clean triggers, and people remember them ("draft a page a
 | `sd-create-booking-page` | Create a booking page or embed an existing one. | `booking_pages_*` | ✓ |
 | `sd-create-website` | Compose a full multi-page site end-to-end. | `posts_create` (xN), `nav_create`, `sites_update` | ✓ |
 | `sd-build-html-embed` | Upload single-file or zipped HTML as an embed page / single-slide deck. | `posts_upload_html(_zip)`, `decks_upload_html(_zip)` | ✓ |
+| `sd-create-short` | Create a branded short video from a prompt, brief, URL, or tenant entity, upload it to media, and emit video block JSON. | `media_upload_presign`, `media_register` | ✓ |
+| `html-render-block` | Edit `html-render` block JSON exported from the portal's Full block JSON panel. | (no MCP) | ✓ |
 
 ---
 

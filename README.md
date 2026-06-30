@@ -1,6 +1,6 @@
 # SimplerDevelopment Skills
 
-Claude Code [skills](https://docs.claude.com/en/docs/claude-code/skills) for working with the [SimplerDevelopment.com](https://simplerdevelopment.com) portal via its MCP server. These skills let Claude draft pages, decks, emails, surveys, booking pages, and full websites against your SimplerDevelopment tenant — all human-in-the-loop with approval URLs before anything goes live.
+Claude Desktop / Claude Code [skills](https://docs.claude.com/en/docs/claude-code/skills) for working with the [SimplerDevelopment.com](https://simplerdevelopment.com) portal via its MCP server. These skills let Claude draft pages, decks, emails, surveys, booking pages, and full websites against your SimplerDevelopment tenant — all human-in-the-loop with approval URLs before anything goes live.
 
 ## Install
 
@@ -10,6 +10,7 @@ Clone into your Claude Code skills directory:
 cd ~/.claude/skills
 git clone https://github.com/SimplerDevelopment/simplerdevelopment-skills.git sd
 ln -s sd/sd-* .
+ln -s sd/html-render-block .
 ln -s sd/CLIENT_QUICKSTART.md .
 ln -s sd/SD_DESIGN_PRINCIPLES.md .
 ```
@@ -34,7 +35,9 @@ Or copy the directories directly into `~/.claude/skills/`.
 | **sd-create-booking-page** | Create a booking page (Calendly-style) or embed an existing one into a CMS page, deck, or email. |
 | **sd-create-website** | Compose a multi-page website end-to-end: sitemap, pages via sub-skills, top-nav, booking widget on contact, qualifier survey on funnel page. |
 | **sd-build-html-embed** | Author a self-contained HTML experience (single file or multi-file zipped bundle up to 50 MB), upload as an `html-embed` page or single-slide deck. |
+| **sd-create-short** | Turn a SimplerDevelopment feature or provided brief into a branded short MP4, upload it to the media library, and return video block JSON plus a LinkedIn caption draft. |
 | **sd-learn** | Capture user feedback into `.sd/learnings.md` so future runs of sibling `sd-create-*` skills consult it before authoring. |
+| **html-render-block** | Edit `html-render` block JSON exported from the portal's Full block JSON panel and return a complete paste-ready JSON object. |
 
 ## Supporting docs
 
