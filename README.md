@@ -71,5 +71,6 @@ MIT. Use them, fork them, send PRs.
 ## Links
 
 - Portal: https://simplerdevelopment.com
+- Platform source: https://github.com/SimplerDevelopment/simplerdevelopment
 - Org: https://github.com/SimplerDevelopment
 - Claude Code skills docs: https://docs.claude.com/en/docs/claude-code/skills
